@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { 
+    faSearch, 
+    faCode, 
+    faUsers, 
+    faCalendarAlt,
+    faCodeBranch
+} from '@fortawesome/free-solid-svg-icons';
 import '../styles/Home.css';
 
 const Home = () => {
@@ -11,7 +19,7 @@ const Home = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await fetch('http://localhost:5000/users');
+                const response = await fetch('http://localhost:5001/users');
                 if (!response.ok) throw new Error('Failed to fetch users');
                 const data = await response.json();
                 setUsers(data);
@@ -25,40 +33,63 @@ const Home = () => {
     }, []);
 
     const handleUserClick = (userId) => {
-        navigate(`/profile/${userId}`); // Navigate to the user's profile
+        navigate(`/profile/${userId}`);
     };
 
     return (
         <div className="home-container">
             <section className="hero-section">
                 <div className="hero-content">
-                    <h1>Connect, Collaborate, and Grow</h1>
-                    <p>Your university’s professional networking and project hub.</p>
-                    <Link to="/jobs" className="cta-button">Explore Opportunities</Link>
+                    <h1>Welcome!</h1>
+                    <p>Connect, Collaborate, and Create Amazing Projects Together</p>
+                    <Link to="/register" className="cta-button">
+                        Register & Contribute
+                    </Link>
                 </div>
             </section>
-            
+
             <section className="features-section">
                 <div className="feature-card">
-                    <h2>Find Projects</h2>
-                    <p>Browse and apply for student-led projects that match your skills.</p>
+                    <FontAwesomeIcon icon={faSearch} className="feature-icon" />
+                    <h3>Find Projects</h3>
+                    <p>Discover exciting open-source projects and events that match your interests and skills.</p>
                 </div>
+
                 <div className="feature-card">
-                    <h2>Showcase Your Work</h2>
-                    <p>Upload projects, certifications, and build a validated profile.</p>
+                    <FontAwesomeIcon icon={faCode} className="feature-icon" />
+                    <h3>Showcase Your Work</h3>
+                    <p>Share your projects and contributions with the community to get feedback and recognition.</p>
                 </div>
+
                 <div className="feature-card">
-                    <h2>Stay Updated</h2>
-                    <p>Get announcements and updates on important events.</p>
+                    <FontAwesomeIcon icon={faUsers} className="feature-icon" />
+                    <h3>Connect with Developers</h3>
+                    <p>Network with like-minded developers, find collaborators, and build your professional network.</p>
                 </div>
             </section>
-            
+
+
             <section className="users-section">
-                <h2>Our Users</h2>
-                {loading ? <p>Loading users...</p> : error ? <p className="error">{error}</p> : (
+                <h2>Featured Members</h2>
+                {loading ? (
+                    <p className="loading">Loading members...</p>
+                ) : error ? (
+                    <p className="error">{error}</p>
+                ) : (
                     <ul className="users-list">
-                        {users.map(user => (
-                            <li key={user.id} className="user-card" onClick={() => handleUserClick(user.id)}>
+                        {users.slice(0, 6).map(user => (
+                            <li 
+                                key={user.id} 
+                                className="user-card" 
+                                onClick={() => handleUserClick(user.id)}
+                                role="button"
+                                tabIndex={0}
+                                onKeyPress={(e) => {
+                                    if (e.key === 'Enter') {
+                                        handleUserClick(user.id);
+                                    }
+                                }}
+                            >
                                 <h3>{user.name}</h3>
                                 <p>{user.email}</p>
                                 <p><strong>Department:</strong> {user.department}</p>

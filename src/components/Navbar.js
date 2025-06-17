@@ -1,74 +1,142 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import "../styles/Navbar.css";
-import { FaSearch, FaUserCircle } from "react-icons/fa";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSearch, faUserCircle, faBell, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
+import { useAuth } from '../context/AuthContext';
+import { notificationService } from '../services/notificationService';
 
 const Navbar = () => {
-  const [userId, setUserId] = useState(localStorage.getItem("userId"));
-  const navigate = useNavigate();
-  const location = useLocation();
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
+    const location = useLocation();
 
-  // Update state on route change or manual localStorage updates
-  useEffect(() => {
-    const updateUser = () => {
-      setUserId(localStorage.getItem("userId"));
+    useEffect(() => {
+        if (user) {
+            fetchNotifications();
+            // Set up polling for new notifications every 5 seconds
+            const interval = setInterval(fetchNotifications, 5000);
+            return () => clearInterval(interval);
+        }
+    }, [user]);
+
+    const fetchNotifications = async () => {
+        try {
+            const [notifs, count] = await Promise.all([
+                notificationService.getUserNotifications(user.id),
+                notificationService.getUnreadCount(user.id)
+            ]);
+            setNotifications(notifs);
+            setUnreadCount(count);
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+        }
     };
 
-    updateUser(); // Run on mount
-    window.addEventListener("storage", updateUser); // For multi-tab sync
-    return () => window.removeEventListener("storage", updateUser);
-  }, []);
+    const handleNotificationClick = async () => {
+        setShowNotifications(!showNotifications);
+        if (!showNotifications && unreadCount > 0) {
+            try {
+                await notificationService.markNotificationsAsRead(user.id);
+                setUnreadCount(0);
+            } catch (error) {
+                console.error('Error marking notifications as read:', error);
+            }
+        }
+    };
 
-  // Update when route changes
-  useEffect(() => {
-    setUserId(localStorage.getItem("userId"));
-  }, [location]);
+    const toggleDropdown = () => {
+        setShowDropdown(!showDropdown);
+        if (showNotifications) {
+            setShowNotifications(false);
+        }
+    };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userId");
-    setUserId(null);
-    navigate("/login");
-  };
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    };
 
-  return (
-    <nav className="navbar">
-      <div className="navbar-left">
-        <Link to="/" className="logo">
-          <span>SkillConnect</span>
-        </Link>
-        <div className="search-bar">
-          <FaSearch className="search-icon" />
-          <input type="text" placeholder="Search for skills, projects, jobs..." />
-        </div>
-      </div>
-
-      <div className="navbar-right">
-        <Link to="/" className="nav-item">Home</Link>
-        <Link to="/jobs" className="nav-item">Contribute</Link>
-        <Link to="/projects" className="nav-item">Projects</Link>
-        {userId && (
-          <Link to={`/profile/${userId}`} className="nav-item">Profile</Link>
-        )}
-        {!userId && (
-          <>
-            <Link to="/login" className="nav-item">Login</Link>
-            <Link to="/signup" className="nav-item">Sign-up</Link>
-          </>
-        )}
-        {userId && (
-          <div className="user-icon">
-            <FaUserCircle size={28} />
-            <div className="dropdown">
-              <Link to={`/profile/${userId}`}>My Profile</Link>
-              <Link to="/settings">Settings</Link>
-              <button onClick={handleLogout} className="logout-button">Logout</button>
+    return (
+        <nav className="navbar">
+            <div className="navbar-left">
+                <Link to="/" className="logo">
+                    <img src="/logo192.png" alt="Logo" />
+                </Link>
+                <div className="nav-links">
+                    <Link to="/" className={location.pathname === "/" ? "active" : ""}>
+                        Home
+                    </Link>
+                    <Link to="/projects" className={location.pathname === "/projects" ? "active" : ""}>
+                        Projects
+                    </Link>
+                    <Link to="/events" className={location.pathname === "/events" ? "active" : ""}>
+                        Events
+                    </Link>
+                    {user && (
+                        <Link to="/register" className={location.pathname === "/register" ? "active" : ""}>
+                            Register
+                        </Link>
+                    )}
+                </div>
             </div>
-          </div>
-        )}
-      </div>
-    </nav>
-  );
+            <div className="navbar-right">
+                <div className="search-bar">
+                    <FontAwesomeIcon icon={faSearch} className="search-icon" />
+                    <input type="text" placeholder="Search for skills, projects, jobs..." />
+                </div>
+                {user ? (
+                    <div className="user-section">
+                        <div className="notification-icon" onClick={handleNotificationClick}>
+                            <FontAwesomeIcon icon={faBell} />
+                            {unreadCount > 0 && (
+                                <span className="notification-badge">{unreadCount}</span>
+                            )}
+                        </div>
+                        {showNotifications && (
+                            <div className="notifications-dropdown">
+                                {notifications.length > 0 ? (
+                                    notifications.map((notification) => (
+                                        <div key={notification.id} className="notification-item">
+                                            <p>{notification.message}</p>
+                                            <small>Project: {notification.project_title}</small>
+                                            <small>Type: {notification.project_type}</small>
+                                            <small>Time: {new Date(notification.created_at).toLocaleString()}</small>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="notification-item empty">
+                                        No notifications
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        <Link to={`/profile/${user.id}`} className="profile-button">
+                            <FontAwesomeIcon icon={faUserCircle} size={28} />
+                            <span>My Profile</span>
+                        </Link>
+                        <button onClick={handleLogout} className="logout-button">
+                            <FontAwesomeIcon icon={faSignOutAlt} />
+                            <span>Logout</span>
+                        </button>
+                    </div>
+                ) : (
+                    <div className="auth-buttons">
+                        <Link to="/login" className="login-button">
+                            Login
+                        </Link>
+                        <Link to="/register" className="register-button">
+                            Register
+                        </Link>
+                    </div>
+                )}
+            </div>
+        </nav>
+    );
 };
 
 export default Navbar;

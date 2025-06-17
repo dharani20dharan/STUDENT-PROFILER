@@ -1,0 +1,234 @@
+/* General Enhancements & Variables */
+:root {
+    /* Light theme variables - keeping for reference */
+    --primary-blue: #3498db;
+    --primary-blue-dark: #2980b9;
+    --dark-text: #2c3e50;
+    --light-text: #7f8c8d;
+    --background-light: #f4f7f6;
+    --card-bg: #ffffff;
+    --border-light: #ecf0f1;
+    --shadow-light: rgba(0, 0, 0, 0.08);
+    --shadow-medium: rgba(0, 0, 0, 0.15);
+}
+
+/* Dark theme variables - Cursor IDE style */
+[data-theme="dark"] {
+    /* Removed as these are now in index.css */
+}
+
+body {
+    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    background-color: var(--background-light);
+    line-height: 1.6;
+    color: var(--dark-text);
+}
+
+/* Projects Container */
+.projects-container {
+    padding: 2.5rem; /* Slightly more padding */
+    max-width: 1300px; /* Wider container */
+    margin: 0 auto;
+    background-color: var(--background-light);
+}
+
+/* Projects Header - Make it more prominent */
+.projects-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem; /* More space below header */
+    padding: 1.5rem 2rem; /* Increased padding */
+    background: linear-gradient(135deg, var(--primary-blue), #5ac2ef); /* Gradient background */
+    border-radius: 15px; /* Softer rounded corners */
+    box-shadow: 0 8px 15px var(--shadow-medium); /* Deeper shadow */
+    color: white; /* Text color for header */
+}
+
+.projects-header h1 {
+    color: white; /* Header text is white on gradient background */
+    font-size: 2.3rem; /* Larger font size for impact */
+    font-weight: 700; /* Bolder font */
+    margin: 0;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); /* Subtle text shadow */
+}
+
+/* Create Button - More prominent and engaging */
+.create-button {
+    background: var(--card-bg);
+    color: var(--primary-blue);
+    border: 2px solid var(--primary-blue);
+    padding: 0.85rem 1.8rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.create-button:hover {
+    background: var(--primary-blue); /* Solid blue on hover */
+    color: white; /* White text on hover */
+    box-shadow: 0 6px 12px var(--shadow-medium); /* Deeper shadow on hover */
+    transform: translateY(-2px); /* Slight lift */
+}
+
+/* Projects Grid */
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); /* Slightly wider min card size */
+    gap: 2.5rem; /* Increased gap between cards */
+}
+
+/* Project Card - Enhanced appearance and interaction */
+.project-card {
+    background: var(--card-bg);
+    border-radius: 15px; /* Softer rounded corners */
+    padding: 2rem; /* More internal padding */
+    box-shadow: 
+        0 6px 15px var(--shadow-light), /* Lighter, more diffuse initial shadow */
+        0 2px 5px rgba(0, 0, 0, 0.08); /* Smaller, sharper shadow */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smoother transitions */
+    border: 1px solid var(--border-light); /* Subtle border */
+    display: flex; /* Flexbox for internal layout if needed later */
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.project-card:hover {
+    transform: translateY(-8px); /* More pronounced lift */
+    box-shadow: 
+        0 12px 25px var(--shadow-medium), /* Deeper shadow on hover */
+        0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+.project-card h3 {
+    color: var(--primary-blue); /* Consistent blue for titles */
+    margin-bottom: 0.8rem; /* Slightly less margin for tighter look */
+    font-size: 1.5rem; /* Larger title font */
+    font-weight: 700; /* Bolder title */
+    line-height: 1.3;
+}
+
+.project-card p {
+    color: var(--dark-text); /* Darker text for readability */
+    margin-bottom: 1.2rem;
+    line-height: 1.6;
+    font-size: 1rem;
+    flex-grow: 1; /* Allows description to take up available space */
+}
+
+.project-card a {
+    display: inline-block;
+    color: var(--primary-blue);
+    text-decoration: none;
+    font-weight: 600; /* Bolder link text */
+    margin-bottom: 0.5rem; /* Less margin for link, if more below it */
+    transition: color 0.2s ease, text-decoration 0.2s ease;
+    border-bottom: 2px solid transparent; /* Subtle underline effect */
+}
+
+.project-card a:hover {
+    color: var(--primary-blue-dark); /* Darker blue on hover */
+    text-decoration: none; /* Remove default underline */
+    border-color: var(--primary-blue-dark); /* Show border on hover */
+}
+
+.project-meta {
+    border-top: 1px solid var(--border-light); /* Lighter border */
+    padding-top: 1.2rem; /* More padding top */
+    margin-top: 1rem; /* Space before border */
+    color: var(--light-text); /* Lighter grey for meta info */
+    font-size: 0.9rem; /* Slightly larger font */
+    line-height: 1.4;
+}
+
+/* Loading & Error States */
+.loading,
+.error {
+    text-align: center;
+    padding: 3rem; /* More padding */
+    font-size: 1.3rem; /* Larger font */
+    font-weight: 500;
+    color: var(--light-text);
+}
+
+.error {
+    color: var(--error-color);
+    background-color: rgba(224, 49, 49, 0.1);
+    border-radius: 8px;
+    margin: 2rem auto;
+    max-width: 600px;
+}
+
+/* --- Media Queries for Responsiveness --- */
+@media (max-width: 1024px) {
+    .projects-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Adjust for smaller screens */
+        gap: 2rem;
+    }
+    .projects-header {
+        padding: 1rem 1.5rem;
+    }
+    .projects-header h1 {
+        font-size: 2.2rem;
+    }
+    .create-button {
+        padding: 0.6rem 1.2rem;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .projects-container {
+        padding: 1.5rem; /* Adjust padding */
+    }
+
+    .projects-grid {
+        grid-template-columns: 1fr; /* Single column on small screens */
+        gap: 1.5rem;
+    }
+
+    .projects-header {
+        flex-direction: column; /* Stack header items */
+        text-align: center;
+        margin-bottom: 2rem;
+        padding: 1rem;
+    }
+
+    .projects-header h1 {
+        font-size: 2rem;
+        margin-bottom: 1rem; /* Space between title and button */
+    }
+
+    .create-button {
+        width: 100%; /* Full width button */
+    }
+
+    .project-card {
+        padding: 1.5rem;
+    }
+    .project-card h3 {
+        font-size: 1.3rem;
+    }
+    .project-card p {
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .projects-container {
+        padding: 1rem;
+    }
+    .projects-header h1 {
+        font-size: 1.8rem;
+    }
+    .create-button {
+        font-size: 0.9rem;
+        padding: 0.6rem 1rem;
+    }
+    .project-card h3 {
+        font-size: 1.2rem;
+    }
+}
