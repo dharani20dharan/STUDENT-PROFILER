@@ -3,28 +3,31 @@
     margin: auto;
     padding: 20px;
     text-align: center;
-    background: #fff;
+    background: var(--card-bg);
     border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 4px 10px var(--shadow-light);
   }
   
   .auth-container h2 {
     font-size: 24px;
     margin-bottom: 20px;
+    color: var(--dark-text);
   }
   
   .auth-container form input, .auth-container form textarea {
     width: 100%;
     padding: 10px;
     margin: 10px 0;
-    border: 1px solid #ccc;
+    border: 1px solid var(--border-light);
     border-radius: 5px;
+    background: var(--card-bg);
+    color: var(--dark-text);
   }
   
   .auth-container button {
     width: 100%;
     padding: 10px;
-    background-color: #0073b1;
+    background-color: var(--primary-blue);
     color: white;
     font-size: 16px;
     border: none;
@@ -33,6 +36,6 @@
   }
   
   .auth-container button:hover {
-    background-color: #005582;
+    background-color: var(--primary-blue-dark);
   }
   

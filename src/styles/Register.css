@@ -1,0 +1,173 @@
+/* src/styles/Register.css */
+.register-container {
+    padding: 2.5rem;
+    max-width: 1300px;
+    margin: 0 auto;
+    background-color: var(--background-light);
+}
+
+.register-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem; /* More space below header */
+    padding: 1.5rem 2rem; /* Increased padding */
+    background: linear-gradient(135deg, var(--primary-blue), #5ac2ef); /* Gradient background */
+    border-radius: 15px; /* Softer rounded corners */
+    box-shadow: 0 8px 15px var(--shadow-medium); /* Deeper shadow */
+    color: white; /* Text color for header */
+}
+
+.register-header h1 {
+    color: white;
+    font-size: 2.3rem;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.register-content {
+    background: var(--card-bg);
+    padding: 3rem;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px var(--shadow-medium);
+    margin: 0 auto;
+    animation: formSlideIn 0.3s ease-out;
+}
+
+.entries-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    padding: 1rem;
+}
+
+.entries-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.entries-column h2 {
+    color: var(--dark-text);
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 0;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border-light);
+}
+
+.entries-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.loading-message {
+    text-align: center;
+    color: var(--light-text);
+    font-size: 1.2rem;
+    padding: 2rem;
+}
+
+.no-entries-message {
+    text-align: center;
+    color: var(--light-text);
+    font-size: 1.2rem;
+    padding: 2rem;
+    background: var(--card-bg);
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.error-message {
+    color: var(--error-color);
+    background-color: rgba(224, 49, 49, 0.1);
+    border: 1px solid rgba(224, 49, 49, 0.2);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    text-align: center;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.success-message {
+    color: var(--success-color);
+    background-color: rgba(40, 167, 69, 0.1);
+    border: 1px solid rgba(40, 167, 69, 0.2);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    text-align: center;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes formSlideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .register-container {
+        padding: 1rem;
+    }
+
+    .register-header {
+        padding: 1.5rem;
+    }
+
+    .register-header h1 {
+        font-size: 2rem;
+    }
+
+    .register-content {
+        padding: 1.5rem;
+    }
+
+    .entries-split {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .entries-column h2 {
+        font-size: 1.6rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .register-container {
+        padding: 0.8rem;
+    }
+
+    .register-header {
+        padding: 1.2rem;
+    }
+
+    .register-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .register-content {
+        padding: 1.2rem;
+    }
+
+    .entries-column h2 {
+        font-size: 1.4rem;
+    }
+} 

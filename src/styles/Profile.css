@@ -2,7 +2,7 @@
 
 body {
   font-family: 'Poppins', sans-serif;
-  background: linear-gradient(to right, #f8f9fa, #e0eafc);
+  background: var(--background-light);
   margin: 0;
   padding: 0;
 }
@@ -24,34 +24,33 @@ body {
   height: 140px;
   object-fit: cover;
   border-radius: 50%;
-  border: 4px solid #3498db;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 4px solid var(--primary-blue);
+  box-shadow: 0 4px 16px var(--shadow-light);
 }
 
-
 .profile-card {
-  background: white;
+  background: var(--card-bg);
   padding: 30px;
   border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 24px var(--shadow-medium);
   animation: fadeIn 0.4s ease-in-out;
 }
 
 .profile-card h1 {
   font-size: 28px;
   margin-bottom: 5px;
-  color: #2c3e50;
+  color: var(--dark-text);
 }
 
 .profile-card .email {
   font-size: 16px;
-  color: #2980b9;
+  color: var(--primary-blue);
   margin-bottom: 15px;
 }
 
 .profile-card .bio {
   font-size: 14px;
-  color: #7f8c8d;
+  color: var(--light-text);
   margin-bottom: 25px;
   font-style: italic;
 }
@@ -62,26 +61,26 @@ body {
 
 .section h2 {
   font-size: 20px;
-  color: #34495e;
+  color: var(--dark-text);
   margin-bottom: 10px;
 }
 
 .section p {
   margin: 6px 0;
   font-size: 15px;
-  color: #2c3e50;
+  color: var(--dark-text);
 }
 
 .section ul {
   list-style: disc;
   padding-left: 20px;
-  color: #2c3e50;
+  color: var(--dark-text);
 }
 
 .back-btn {
   margin-top: 20px;
   padding: 12px 20px;
-  background: #3498db;
+  background: var(--primary-blue);
   color: white;
   border: none;
   border-radius: 10px;
@@ -91,7 +90,7 @@ body {
 }
 
 .back-btn:hover {
-  background: #2c80b4;
+  background: var(--primary-blue-dark);
   transform: scale(1.03);
 }
 
@@ -100,7 +99,7 @@ body {
   text-align: center;
   font-size: 18px;
   margin-top: 50px;
-  color: #e74c3c;
+  color: #e03131;
 }
 
 @keyframes fadeIn {

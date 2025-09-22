@@ -1,8 +1,8 @@
 /* General Styling */
 body {
     font-family: 'Poppins', sans-serif;
-    background-color: #F3F2EF;
-    color: #191919;
+    background-color: var(--background-light);
+    color: var(--dark-text);
     margin: 0;
     padding: 0;
   }
@@ -12,16 +12,16 @@ body {
     width: 100%;
     max-width: 400px;
     margin: 80px auto;
-    background: white;
+    background: var(--card-bg);
     padding: 30px;
     border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 10px var(--shadow-light);
     text-align: center;
   }
   
   .auth-container h2 {
     font-size: 2rem;
-    color: #0A66C2;
+    color: var(--primary-blue);
     margin-bottom: 15px;
   }
   
@@ -30,15 +30,17 @@ body {
     width: 100%;
     padding: 12px;
     margin: 10px 0;
-    border: 1px solid #ccc;
+    border: 1px solid var(--border-light);
     border-radius: 6px;
     font-size: 1rem;
     outline: none;
     transition: border 0.3s;
+    background: var(--card-bg);
+    color: var(--dark-text);
   }
   
   .auth-container input:focus {
-    border-color: #0A66C2;
+    border-color: var(--primary-blue);
   }
   
   /* Login Button */
@@ -46,7 +48,7 @@ body {
     width: 100%;
     padding: 12px;
     margin-top: 15px;
-    background-color: #0A66C2;
+    background-color: var(--primary-blue);
     color: white;
     border: none;
     font-size: 1rem;
@@ -57,17 +59,17 @@ body {
   }
   
   .auth-container button:hover {
-    background-color: #004182;
+    background-color: var(--primary-blue-dark);
   }
   
   .auth-container button:disabled {
-    background-color: #86888A;
+    background-color: var(--light-text);
     cursor: not-allowed;
   }
   
   /* Error Message */
   .error-message {
-    color: red;
+    color: #e03131;
     font-size: 1rem;
     margin-bottom: 10px;
   }
@@ -76,10 +78,11 @@ body {
   .auth-container p {
     margin-top: 15px;
     font-size: 1rem;
+    color: var(--dark-text);
   }
   
   .auth-container p a {
-    color: #0A66C2;
+    color: var(--primary-blue);
     text-decoration: none;
     font-weight: 500;
   }

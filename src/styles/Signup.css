@@ -2,9 +2,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
 body {
-    background: linear-gradient(135deg, #eef2f3, #d7e1ec); /* Soft gradient background */
+    background: var(--background-light);
     font-family: 'Poppins', sans-serif;
-    color: #2c3e50;
+    color: var(--dark-text);
 }
 
 /* Glassmorphic Container */
@@ -12,24 +12,24 @@ body {
     max-width: 450px;
     margin: 50px auto;
     padding: 25px;
-    background: rgba(255, 255, 255, 0.8);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    background: var(--card-bg);
+    box-shadow: 0 4px 20px var(--shadow-medium);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-radius: 15px;
     text-align: center;
     transition: all 0.3s ease-in-out;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid var(--border-light);
 }
 
 .signup-container:hover {
     transform: translateY(-5px);
-    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 6px 25px var(--shadow-medium);
 }
 
 /* Heading */
 .signup-container h2 {
-    color: #34495e;
+    color: var(--dark-text);
     font-size: 26px;
     font-weight: 600;
     margin-bottom: 20px;
@@ -41,11 +41,11 @@ body {
     width: 100%;
     padding: 12px;
     margin: 10px 0;
-    border: 2px solid transparent;
+    border: 2px solid var(--border-light);
     border-radius: 10px;
     font-size: 14px;
-    background: rgba(255, 255, 255, 0.9);
-    color: #333;
+    background: var(--card-bg);
+    color: var(--dark-text);
     outline: none;
     transition: all 0.3s ease-in-out;
 }
@@ -53,13 +53,13 @@ body {
 /* Focus Effect */
 .signup-container input:focus,
 .signup-container textarea:focus {
-    border-color: #3498db;
+    border-color: var(--primary-blue);
     box-shadow: 0px 0px 10px rgba(52, 152, 219, 0.5);
 }
 
 .signup-container input::placeholder,
 .signup-container textarea::placeholder {
-    color: rgba(44, 62, 80, 0.6);
+    color: var(--light-text);
 }
 
 /* File input */
@@ -67,7 +67,7 @@ body {
     border: none;
     padding: 8px;
     cursor: pointer;
-    color: #2980b9;
+    color: var(--primary-blue);
 }
 
 /* Signup Button */
@@ -75,7 +75,7 @@ body {
     width: 100%;
     padding: 12px;
     margin-top: 15px;
-    background: linear-gradient(135deg, #3498db, #2980b9);
+    background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-dark));
     color: white;
     border: none;
     border-radius: 8px;
@@ -83,24 +83,24 @@ body {
     font-weight: 600;
     cursor: pointer;
     transition: 0.3s;
-    box-shadow: 0px 4px 10px rgba(52, 152, 219, 0.4);
+    box-shadow: 0px 4px 10px var(--shadow-light);
 }
 
 .signup-container button:hover {
-    background: linear-gradient(135deg, #2980b9, #1c6690);
-    box-shadow: 0px 4px 15px rgba(52, 152, 219, 0.6);
+    background: linear-gradient(135deg, var(--primary-blue-dark), var(--primary-blue));
+    box-shadow: 0px 4px 15px var(--shadow-medium);
     transform: scale(1.05);
 }
 
 /* Disabled button */
 .signup-container button:disabled {
-    background: #bdc3c7;
+    background: var(--light-text);
     cursor: not-allowed;
 }
 
 /* Error message */
 .error-message {
-    color: #e74c3c;
+    color: #e03131;
     font-size: 14px;
     margin-bottom: 10px;
 }
@@ -114,7 +114,7 @@ body {
 .uploaded-files h3 {
     font-size: 18px;
     margin-bottom: 5px;
-    color: #2c3e50;
+    color: var(--dark-text);
 }
 
 .uploaded-files ul {
@@ -125,7 +125,7 @@ body {
 .uploaded-files li {
     display: flex;
     align-items: center;
-    background: rgba(255, 255, 255, 0.8);
+    background: var(--background-light);
     padding: 8px 12px;
     border-radius: 8px;
     margin: 5px 0;
@@ -134,7 +134,7 @@ body {
 
 /* File remove button */
 .remove-file-btn {
-    background: #e74c3c;
+    background: #e03131;
     color: white;
     border: none;
     font-size: 14px;

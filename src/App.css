@@ -36,3 +36,45 @@
     transform: rotate(360deg);
   }
 }
+
+.app {
+  min-height: 100vh;
+  background-color: var(--background-light);
+}
+
+.main-content {
+  min-height: calc(100vh - 80px); /* Subtract navbar height */
+  background-color: var(--background-light);
+  padding: 0;
+  margin: 0;
+}
+
+/* Ensure all pages have the correct background */
+.events-container,
+.projects-container,
+.register-container,
+.home-container {
+  background-color: var(--background-light);
+  min-height: calc(100vh - 80px);
+  padding: 2.5rem;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+/* Ensure all cards and modals have the correct background */
+.event-card,
+.project-card,
+.feature-card,
+.user-card,
+.modal-content,
+.auth-container {
+  background-color: var(--card-bg);
+  color: var(--dark-text);
+}
+
+/* Ensure all form inputs have the correct background */
+input, textarea, select {
+  background-color: var(--card-bg) !important;
+  color: var(--dark-text) !important;
+  border-color: var(--border-light) !important;
+}

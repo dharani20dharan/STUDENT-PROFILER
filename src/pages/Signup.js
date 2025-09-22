@@ -54,7 +54,7 @@ function Signup() {
 
   const removeUploadedFile = async (index, filePath) => {
     try {
-      const response = await fetch("http://localhost:5000/remove-file", {
+      const response = await fetch("http://localhost:5001/remove-file", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ filePath }),
@@ -103,7 +103,7 @@ function Signup() {
     if (profilePicture) submissionData.append("profilePicture", profilePicture);
 
     try {
-      const response = await fetch("http://localhost:5000/signup", {
+      const response = await fetch("http://localhost:5001/signup", {
         method: "POST",
         body: submissionData,
       });
@@ -227,7 +227,7 @@ function Signup() {
           <ul>
             {uploadedFiles.map((file, index) => (
               <li key={index}>
-                <a href={`http://localhost:5000${file}`} target="_blank" rel="noopener noreferrer">
+                <a href={`http://localhost:5001${file}`} target="_blank" rel="noopener noreferrer">
                   {file}
                 </a>
                 <button

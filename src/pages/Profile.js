@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import "../styles/Profile.css";
 
 function Profile() {
   const navigate = useNavigate();
   const { userId } = useParams();
+  const { user: currentUser } = useAuth();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
+    if (!currentUser) {
       setError("You must be logged in to view this page.");
       setLoading(false);
       setTimeout(() => navigate("/login"), 2000);
@@ -21,7 +21,8 @@ function Profile() {
 
     const fetchUserProfile = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/profile/${userId}`, {
+        const token = localStorage.getItem("token");
+        const response = await fetch(`http://localhost:5001/profile/${userId}`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -41,7 +42,7 @@ function Profile() {
     };
 
     fetchUserProfile();
-  }, [navigate, userId]);
+  }, [navigate, userId, currentUser]);
 
   if (loading) return <div className="loading">Loading Profile...</div>;
   if (error) return <div className="error-message">{error}</div>;
@@ -55,7 +56,7 @@ function Profile() {
           <img
             src={
               user.profile_picture
-                ? `http://localhost:5000${user.profile_picture}`
+                ? `http://localhost:5001${user.profile_picture}`
                 : "https://via.placeholder.com/150"
             }
             alt="Profile"
@@ -131,7 +132,7 @@ function Profile() {
                 <li key={index}>
                   <strong>{doc.name}</strong> —{" "}
                   <a
-                    href={`http://localhost:5000${doc.file}`}
+                    href={`http://localhost:5001${doc.file}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="document-link"
