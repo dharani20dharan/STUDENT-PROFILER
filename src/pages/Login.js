@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/Login.css";
+import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -10,6 +11,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth(); // Destructure login from context
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -46,8 +48,14 @@ const Login = () => {
         throw new Error("Incomplete response from server.");
       }
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("userId", data.userId);
+      // Use the login function from context
+      login({
+        token: data.token,
+        id: data.userId,
+        name: data.name,
+        profile_picture: data.profile_picture
+      });
+
       alert("✅ Login successful!");
       navigate(`/profile/${data.userId}`);
     } catch (err) {
@@ -57,6 +65,7 @@ const Login = () => {
 
     setLoading(false);
   };
+
 
   return (
     <div className="auth-container">

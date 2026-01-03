@@ -8,21 +8,33 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         // Check if user is logged in on mount
+        const storedUser = localStorage.getItem('user');
         const token = localStorage.getItem('token');
-        if (token) {
-            // You can add token validation logic here
-            setUser({ token });
+
+        if (token && storedUser) {
+            try {
+                const parsedUser = JSON.parse(storedUser);
+                setUser({ ...parsedUser, token });
+            } catch (e) {
+                console.error("Failed to parse user data", e);
+                localStorage.removeItem('user');
+                localStorage.removeItem('token');
+            }
         }
         setLoading(false);
     }, []);
 
-    const login = (token) => {
-        localStorage.setItem('token', token);
-        setUser({ token });
+    const login = (userData) => {
+        // userData should include token, userId, name, etc.
+        localStorage.setItem('token', userData.token);
+        localStorage.setItem('user', JSON.stringify(userData));
+        setUser(userData);
     };
 
     const logout = () => {
         localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('userId'); // Cleanup legacy item if exists
         setUser(null);
     };
 

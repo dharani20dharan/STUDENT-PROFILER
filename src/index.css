@@ -1,51 +1,26 @@
-/* Global CSS Variables */
-:root {
-  /* Dark theme variables - Cursor IDE style */
-  --primary-blue: #FF8C00; /* Orange instead of blue */
-  --primary-blue-dark: #FF6B00; /* Darker orange */
-  --dark-text: #E9ECEF;
-  --light-text: #ADB5BD;
-  --background-light: #1A1B1E;
-  --card-bg: #25262B;
-  --border-light: #373A40;
-  --shadow-light: rgba(0, 0, 0, 0.2);
-  --shadow-medium: rgba(0, 0, 0, 0.3);
-  --error-color: #e03131;
-  --success-color: #28a745;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Base Styles */
+@layer base {
+  body {
+    @apply bg-background text-text-primary antialiased;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight;
+  }
 }
 
-/* Force dark mode */
-html {
-  background-color: var(--background-light);
-  color-scheme: dark;
+/* Glassmorphism Utilities */
+@layer utilities {
+  .glass {
+    @apply bg-surface/80 backdrop-blur-md border border-white/10;
+  }
+  
+  .glass-card {
+    @apply bg-surface/50 backdrop-blur-sm border border-white/5 rounded-xl transition-all duration-300 hover:bg-surface/70 hover:border-white/10 shadow-lg;
+  }
 }
 
-html[data-theme="dark"] {
-  --primary-blue: #FF8C00;
-  --primary-blue-dark: #FF6B00;
-  --dark-text: #E9ECEF;
-  --light-text: #ADB5BD;
-  --background-light: #1A1B1E;
-  --card-bg: #25262B;
-  --border-light: #373A40;
-  --shadow-light: rgba(0, 0, 0, 0.2);
-  --shadow-medium: rgba(0, 0, 0, 0.3);
-  --error-color: #e03131;
-  --success-color: #28a745;
-}
-
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: var(--background-light);
-  color: var(--dark-text);
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}

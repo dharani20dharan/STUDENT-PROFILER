@@ -26,12 +26,17 @@ function App() {
       <Router>
         <div className="app">
           <Navbar />
-          <main className="main-content">
+          <main className="pt-20 min-h-screen bg-background text-text-primary">
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/profile" element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              } />
+              <Route path="/profile/:userId" element={
                 <ProtectedRoute>
                   <Profile />
                 </ProtectedRoute>

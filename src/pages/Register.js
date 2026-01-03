@@ -1,9 +1,12 @@
-// src/pages/Register.js
 import React, { useState, useEffect, useCallback } from 'react';
-import '../styles/Register.css';
+import { useNavigate } from 'react-router-dom';
 import EventCard from '../components/EventCard';
 import EventDetailModal from '../components/EventDetailModal';
-import { useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faProjectDiagram, faCalendarAlt, faSearch } from '@fortawesome/free-solid-svg-icons';
+
+// Helper to get API URL
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
 
 const Register = () => {
     const [entries, setEntries] = useState([]);
@@ -13,9 +16,7 @@ const Register = () => {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
-    const getAuthToken = () => {
-        return localStorage.getItem('token');
-    };
+    const getAuthToken = () => localStorage.getItem('token');
 
     const fetchAllEntries = useCallback(async () => {
         setLoading(true);
@@ -28,27 +29,13 @@ const Register = () => {
                 return;
             }
 
-            const url = 'http://localhost:5001/api/all-projects';
-            const response = await fetch(url, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+            const response = await fetch(`${API_URL}/api/all-projects`, {
+                headers: { 'Authorization': `Bearer ${token}` }
             });
 
-            if (!response.ok) {
-                let errorData;
-                const contentType = response.headers.get("content-type");
-                if (contentType && contentType.includes("application/json")) {
-                    errorData = await response.json();
-                } else {
-                    errorData = await response.text();
-                }
-                console.error('Error fetching entries - Server Response:', errorData);
-                throw new Error(errorData.message || `Failed to fetch entries: ${response.statusText}`);
-            }
+            if (!response.ok) throw new Error('Failed to fetch entries');
 
             const data = await response.json();
-            console.log('Fetched All Entries Data:', data);
             setEntries(data);
         } catch (err) {
             console.error("Error fetching entries:", err);
@@ -71,11 +58,11 @@ const Register = () => {
         try {
             const token = getAuthToken();
             if (!token) {
-                alert("You must be logged in to register for an entry.");
+                alert("You must be logged in to register.");
                 return;
             }
 
-            const response = await fetch(`http://localhost:5001/api/projects/${entryId}/register`, {
+            const response = await fetch(`${API_URL}/api/projects/${entryId}/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -85,29 +72,20 @@ const Register = () => {
             });
 
             if (!response.ok) {
-                let errorData;
-                const contentType = response.headers.get("content-type");
-                if (contentType && contentType.includes("application/json")) {
-                    errorData = await response.json();
-                } else {
-                    errorData = await response.text();
-                }
-                console.error('Error registering for entry - Server Response:', errorData);
                 if (response.status === 409) {
                     alert("You have already registered for this entry!");
                 } else {
-                    alert('Error registering for entry: ' + (errorData.message || response.statusText));
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || 'Failed to register');
                 }
                 return;
             }
 
-            const data = await response.json();
-            console.log('Registration successful:', data);
-            alert('Successfully registered for the entry!');
+            alert('Successfully registered!');
             setShowDetailModal(false);
         } catch (err) {
-            console.error('Error registering for entry:', err);
-            alert('Error registering for entry: ' + err.message);
+            console.error('Error registering:', err);
+            alert('Error registering: ' + err.message);
         }
     };
 
@@ -115,30 +93,43 @@ const Register = () => {
         navigate(`/profile/${userIdToView}`);
     };
 
-    // Separate projects and events
-    const projects = entries.filter(entry => entry.type === 'project');
-    const events = entries.filter(entry => entry.type === 'event');
+    const { projects, events } = {
+        projects: entries.filter(entry => entry.type === 'project'),
+        events: entries.filter(entry => entry.type === 'event')
+    };
 
     return (
-        <div className="register-container">
-            <div className="register-header">
-                <h1>Register & Contribute!</h1>
-            </div>
+        <div className="min-h-screen pb-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* Header */}
+                <div className="text-center mb-12">
+                    <h1 className="text-4xl font-bold text-white mb-4">Discover & Contribute</h1>
+                    <p className="text-text-secondary max-w-2xl mx-auto">
+                        Explore open source projects and community events. Join, collaborate, and make an impact.
+                    </p>
+                </div>
 
-            <div className="register-content">
-                {loading && <p className="loading-message">Loading entries...</p>}
-                {error && <p className="error-message">{error}</p>}
+                {loading ? (
+                    <div className="flex justify-center py-20">
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                    </div>
+                ) : error ? (
+                    <div className="bg-red-500/10 border border-red-500/50 text-red-500 rounded-lg p-6 text-center max-w-xl mx-auto">
+                        <p className="font-bold">{error}</p>
+                    </div>
+                ) : (
+                    <div className="space-y-16">
+                        {/* Projects Section */}
+                        <section>
+                            <div className="flex items-center mb-6">
+                                <div className="p-2 rounded-lg bg-primary/20 text-primary mr-3">
+                                    <FontAwesomeIcon icon={faProjectDiagram} />
+                                </div>
+                                <h2 className="text-2xl font-bold text-white">Community Projects</h2>
+                            </div>
 
-                {!loading && !error && (
-                    <div className="entries-split">
-                        <div className="entries-column">
-                            <h2>Community Projects</h2>
-                            {projects.length === 0 ? (
-                                <p className="no-entries-message">
-                                    No projects available for registration yet.
-                                </p>
-                            ) : (
-                                <div className="entries-list">
+                            {projects.length > 0 ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {projects.map(entry => (
                                         <EventCard
                                             key={entry.id}
@@ -147,17 +138,24 @@ const Register = () => {
                                         />
                                     ))}
                                 </div>
-                            )}
-                        </div>
-
-                        <div className="entries-column">
-                            <h2>Community Events</h2>
-                            {events.length === 0 ? (
-                                <p className="no-entries-message">
-                                    No events available for registration yet.
-                                </p>
                             ) : (
-                                <div className="entries-list">
+                                <div className="text-center py-10 bg-white/5 rounded-xl border border-white/5">
+                                    <p className="text-text-secondary">No active projects found.</p>
+                                </div>
+                            )}
+                        </section>
+
+                        {/* Events Section */}
+                        <section>
+                            <div className="flex items-center mb-6">
+                                <div className="p-2 rounded-lg bg-accent/20 text-accent mr-3">
+                                    <FontAwesomeIcon icon={faCalendarAlt} />
+                                </div>
+                                <h2 className="text-2xl font-bold text-white">Upcoming Events</h2>
+                            </div>
+
+                            {events.length > 0 ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {events.map(entry => (
                                         <EventCard
                                             key={entry.id}
@@ -166,25 +164,32 @@ const Register = () => {
                                         />
                                     ))}
                                 </div>
+                            ) : (
+                                <div className="text-center py-10 bg-white/5 rounded-xl border border-white/5">
+                                    <p className="text-text-secondary">No upcoming events found.</p>
+                                </div>
                             )}
-                        </div>
+                        </section>
                     </div>
                 )}
             </div>
 
-            <EventDetailModal
-                show={showDetailModal}
-                onClose={() => {
-                    setShowDetailModal(false);
-                    setSelectedEntry(null);
-                }}
-                project={selectedEntry}
-                isHost={false}
-                onRegister={handleRegisterEntry}
-                onDelete={() => {}}
-                registeredUsers={[]}
-                onViewProfile={handleViewProfile}
-            />
+            {/* Modal */}
+            {showDetailModal && selectedEntry && (
+                <EventDetailModal
+                    show={true}
+                    project={selectedEntry}
+                    isHost={false}
+                    onRegister={handleRegisterEntry}
+                    onDelete={() => { }}
+                    registeredUsers={[]}
+                    onViewProfile={handleViewProfile}
+                    onClose={() => {
+                        setShowDetailModal(false);
+                        setSelectedEntry(null);
+                    }}
+                />
+            )}
         </div>
     );
 };

@@ -51,7 +51,7 @@ connection.connect((err) => {
         process.exit(1);
     } else {
         console.log("✅ Connected to Aiven MySQL successfully!");
-        
+
         // Check notifications table structure
         connection.query(`
             CREATE TABLE IF NOT EXISTS notifications (
@@ -232,7 +232,13 @@ app.post("/login", (req, res) => {
             { expiresIn: "1h" }
         );
 
-        res.json({ message: "✅ Login successful", token, userId: user.id });
+        res.json({
+            message: "✅ Login successful",
+            token,
+            userId: user.id,
+            name: user.name,
+            profile_picture: user.profile_picture
+        });
     });
 });
 
@@ -346,7 +352,7 @@ app.get('/api/projects', authenticateToken, (req, res) => {
 app.post('/api/projects', authenticateToken, (req, res) => {
     const userId = req.userId;
     // FIX: Destructure 'type' from req.body, default to 'project' if not provided
-    const { project_name, project_description, links, type = 'project' } = req.body; 
+    const { project_name, project_description, links, type = 'project' } = req.body;
 
     if (!userId) {
         return res.status(401).json({ message: 'User not authenticated for event creation.' });
@@ -554,9 +560,9 @@ app.post('/api/projects/:id/register', authenticateToken, (req, res) => {
                                     });
                                 }
                                 console.log('Transaction committed successfully');
-                                res.status(201).json({ 
-                                    message: 'Successfully registered for the event!', 
-                                    registrationId: result.insertId 
+                                res.status(201).json({
+                                    message: 'Successfully registered for the event!',
+                                    registrationId: result.insertId
                                 });
                             });
                         });

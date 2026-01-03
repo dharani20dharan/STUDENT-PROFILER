@@ -1,11 +1,14 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
-import '../styles/Projects.css';
 import EventCard from '../components/EventCard';
-import EventDetailModal from '../components/EventDetailModal';
 import EventModal from '../components/EventModal';
+import EventDetailModal from '../components/EventDetailModal';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+
+// Helper to get API URL
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
 
 const Projects = () => {
     const [userEntries, setUserEntries] = useState([]);
@@ -18,74 +21,65 @@ const Projects = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
 
-    useEffect(() => {
-        fetchUserEntries();
+    const getAuthToken = () => localStorage.getItem('token');
+
+    const fetchUserEntries = useCallback(async () => {
+        try {
+            const token = getAuthToken();
+            if (!token) {
+                setError('You must be logged in to view projects.');
+                setLoading(false);
+                return;
+            }
+
+            const response = await fetch(`${API_URL}/api/projects`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!response.ok) throw new Error('Failed to fetch projects');
+
+            const data = await response.json();
+            const projectsOnly = data.filter(entry => entry.type === 'project');
+            setUserEntries(projectsOnly);
+        } catch (err) {
+            console.error('Error fetching projects:', err);
+            setError('Failed to load projects');
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
-    const fetchUserEntries = async () => {
+    const fetchRegisteredUsers = useCallback(async (entryId) => {
         try {
-            const response = await axios.get('http://localhost:5001/api/projects', {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
+            const token = getAuthToken();
+            if (!token) return [];
+
+            const response = await fetch(`${API_URL}/api/projects/${entryId}/registrations`, {
+                headers: { 'Authorization': `Bearer ${token}` }
             });
-            // Filter to only show projects
-            const projectsOnly = response.data.filter(entry => entry.type === 'project');
-            setUserEntries(projectsOnly);
-            setLoading(false);
-        } catch (error) {
-            console.error('Error fetching projects:', error);
-            setError('Failed to load projects');
-            setLoading(false);
+
+            if (!response.ok) throw new Error('Failed to fetch registered users');
+
+            return await response.json();
+        } catch (err) {
+            console.error('Error fetching registered users:', err);
+            return [];
         }
-    };
+    }, []);
 
-    const handleEntryCardClick = (entry) => {
-        setSelectedEntry(entry);
-        setShowDetailModal(true);
-    };
+    useEffect(() => {
+        fetchUserEntries();
+    }, [fetchUserEntries]);
 
-    const handleDeleteEntry = async (id) => {
+    const handleCreateProject = useCallback(async (projectData) => {
         try {
-            const response = await axios.delete(`http://localhost:5001/api/projects/${id}`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-            if (response.status === 204) {
-                fetchUserEntries();
-            }
-        } catch (error) {
-            console.error('Error deleting project:', error);
-            alert('Error deleting project: ' + error.message);
-        }
-    };
-
-    const handleRegisterForEntry = async (id) => {
-        try {
-            const response = await axios.post(`http://localhost:5001/api/projects/${id}/register`, null, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-            if (response.status === 200) {
-                fetchUserEntries();
-            }
-        } catch (error) {
-            console.error('Error registering for project:', error);
-            alert('Error registering for project: ' + error.message);
-        }
-    };
-
-    const handleCreateProject = async (projectData) => {
-        try {
-            const token = localStorage.getItem('token');
+            const token = getAuthToken();
             if (!token) {
                 alert("You must be logged in to create a project.");
                 return;
             }
 
-            const response = await fetch('http://localhost:5001/api/projects', {
+            const response = await fetch(`${API_URL}/api/projects`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -98,60 +92,130 @@ const Projects = () => {
             });
 
             if (!response.ok) {
-                let errorData;
-                const contentType = response.headers.get("content-type");
-                if (contentType && contentType.includes("application/json")) {
-                    errorData = await response.json();
-                } else {
-                    errorData = await response.text();
-                }
-                throw new Error(errorData.message || `Failed to create project: ${response.statusText}`);
+                const errorData = await response.json().catch(() => ({ message: response.statusText }));
+                throw new Error(errorData.message || 'Failed to create project');
             }
 
-            const createdProject = await response.json();
             setShowCreateModal(false);
             fetchUserEntries();
-            alert('Project created successfully!');
+            // Success handled by UI update
         } catch (err) {
             console.error('Error creating project:', err);
             alert('Error creating project: ' + err.message);
         }
-    };
+    }, [fetchUserEntries]);
 
-    if (loading) return <div className="loading">Loading projects...</div>;
-    if (error) return <div className="error">{error}</div>;
+    const handleEntryCardClick = useCallback(async (entry) => {
+        setSelectedEntry(entry);
+        const isCurrentUsersEntry = entry.user_id === parseInt(user?.id);
+
+        if (isCurrentUsersEntry) {
+            const users = await fetchRegisteredUsers(entry.id);
+            setRegisteredUsers(users);
+        } else {
+            setRegisteredUsers([]);
+        }
+        setShowDetailModal(true);
+    }, [user?.id, fetchRegisteredUsers]);
+
+    const handleDeleteEntry = useCallback(async (id) => {
+        if (!window.confirm("Are you sure you want to delete this project?")) return;
+
+        try {
+            const token = getAuthToken();
+            const response = await fetch(`${API_URL}/api/projects/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!response.ok) throw new Error('Failed to delete project');
+
+            setShowDetailModal(false);
+            fetchUserEntries();
+        } catch (err) {
+            console.error('Error deleting project:', err);
+            alert('Error deleting project: ' + err.message);
+        }
+    }, [fetchUserEntries]);
+
+    const handleRegisterForEntry = useCallback(async (id) => {
+        try {
+            const token = getAuthToken();
+            const response = await fetch(`${API_URL}/api/projects/${id}/register`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!response.ok) throw new Error('Failed to register');
+
+            alert('Successfully registered!');
+            // Refresh logic if needed
+        } catch (err) {
+            console.error('Error registering:', err);
+            alert('Error registering: ' + err.message);
+        }
+    }, []);
+
+    const handleViewProfile = useCallback((userIdToView) => {
+        navigate(`/profile/${userIdToView}`);
+    }, [navigate]);
 
     return (
-        <div className="projects-container">
-            <div className="projects-header">
-                <h1>Projects</h1>
-                {user && (
-                    <button 
-                        onClick={() => setShowCreateModal(true)} 
-                        className="create-button"
-                    >
-                        Create New Project
-                    </button>
+        <div className="min-h-screen pb-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold text-white mb-2">My Projects</h1>
+                        <p className="text-text-secondary">Showcase your work and find collaborators.</p>
+                    </div>
+                    {user && (
+                        <button
+                            onClick={() => setShowCreateModal(true)}
+                            className="bg-primary hover:bg-primary-blue-dark text-white px-6 py-3 rounded-full font-bold shadow-lg shadow-primary/25 transition-all transform hover:scale-105 active:scale-95 flex items-center"
+                        >
+                            <FontAwesomeIcon icon={faPlus} className="mr-2" /> Add New Project
+                        </button>
+                    )}
+                </div>
+
+                {/* Content */}
+                {loading ? (
+                    <div className="flex justify-center py-20">
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                    </div>
+                ) : error ? (
+                    <div className="bg-red-500/10 border border-red-500/50 text-red-500 rounded-lg p-6 text-center max-w-xl mx-auto">
+                        <p className="font-bold">{error}</p>
+                    </div>
+                ) : userEntries.length === 0 ? (
+                    <div className="text-center py-20 bg-white/5 rounded-2xl border border-white/5">
+                        <p className="text-text-secondary text-lg mb-4">No projects found.</p>
+                        <button
+                            onClick={() => setShowCreateModal(true)}
+                            className="text-primary hover:text-white font-medium transition-colors"
+                        >
+                            Create your first project
+                        </button>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {userEntries.map((entry) => (
+                            <EventCard
+                                key={entry.id}
+                                project={entry}
+                                onClick={() => handleEntryCardClick(entry)}
+                            />
+                        ))}
+                    </div>
                 )}
             </div>
-            {userEntries.length === 0 ? (
-                <div className="no-projects">
-                    <p>No projects found.</p>
-                </div>
-            ) : (
-                <div className="projects-grid">
-                    {userEntries.map((entry) => (
-                        <EventCard
-                            key={entry.id}
-                            project={entry}
-                            onClick={() => handleEntryCardClick(entry)}
-                        />
-                    ))}
-                </div>
-            )}
+
+            {/* Modals */}
             {showDetailModal && selectedEntry && (
                 <EventDetailModal
-                    event={selectedEntry}
+                    show={true}
+                    project={selectedEntry}
                     registeredUsers={registeredUsers}
                     onClose={() => {
                         setShowDetailModal(false);
@@ -160,9 +224,11 @@ const Projects = () => {
                     }}
                     onDelete={() => handleDeleteEntry(selectedEntry.id)}
                     onRegister={() => handleRegisterForEntry(selectedEntry.id)}
-                    isCurrentUsersEvent={selectedEntry.user_id === parseInt(user?.id)}
+                    onViewProfile={handleViewProfile}
+                    isHost={selectedEntry.user_id === parseInt(user?.id)}
                 />
             )}
+
             <EventModal
                 show={showCreateModal}
                 onClose={() => setShowCreateModal(false)}

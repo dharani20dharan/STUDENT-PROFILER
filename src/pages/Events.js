@@ -1,25 +1,28 @@
-// src/pages/Events.js
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import '../styles/Events.css'; 
-import EventCard from '../components/EventCard'; 
-import EventModal from '../components/EventModal'; 
-import EventDetailModal from '../components/EventDetailModal'; 
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import EventCard from '../components/EventCard';
+import EventModal from '../components/EventModal';
+import EventDetailModal from '../components/EventDetailModal';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+
+// Helper to get API URL
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
 
 const Events = () => {
-    // Renamed state to hold all user's entries (events and projects)
-    const [userEntries, setUserEntries] = useState([]); 
+    const [userEntries, setUserEntries] = useState([]);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showDetailModal, setShowDetailModal] = useState(false);
-    const [selectedEntry, setSelectedEntry] = useState(null); // Renamed state
+    const [selectedEntry, setSelectedEntry] = useState(null);
     const [registeredUsers, setRegisteredUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const { user } = useAuth();
     const navigate = useNavigate();
 
-    // Memoize the initialData for EventModal
+    const getAuthToken = () => localStorage.getItem('token');
+
     const modalInitialData = useMemo(() => {
         if (selectedEntry) {
             return {
@@ -33,10 +36,6 @@ const Events = () => {
         return { type: 'event' };
     }, [selectedEntry]);
 
-    const getAuthToken = () => {
-        return localStorage.getItem('token');
-    };
-
     const fetchUserEntries = useCallback(async () => {
         try {
             const token = getAuthToken();
@@ -46,24 +45,19 @@ const Events = () => {
                 return;
             }
 
-            const response = await fetch('http://localhost:5001/api/projects', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+            const response = await fetch(`${API_URL}/api/projects`, {
+                headers: { 'Authorization': `Bearer ${token}` }
             });
 
-            if (!response.ok) {
-                throw new Error('Failed to fetch events');
-            }
+            if (!response.ok) throw new Error('Failed to fetch events');
 
             const data = await response.json();
-            // Filter to only show events
             const eventsOnly = data.filter(entry => entry.type === 'event');
             setUserEntries(eventsOnly);
-            setLoading(false);
         } catch (err) {
             console.error('Error fetching events:', err);
             setError('Failed to load events');
+        } finally {
             setLoading(false);
         }
     }, []);
@@ -71,28 +65,15 @@ const Events = () => {
     const fetchRegisteredUsers = useCallback(async (entryId) => {
         try {
             const token = getAuthToken();
-            if (!token) {
-                console.error("No token to fetch registered users.");
-                return [];
-            }
-            const response = await fetch(`http://localhost:5001/api/projects/${entryId}/registrations`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+            if (!token) return [];
+
+            const response = await fetch(`${API_URL}/api/projects/${entryId}/registrations`, {
+                headers: { 'Authorization': `Bearer ${token}` }
             });
 
-            if (!response.ok) {
-                let errorData;
-                const contentType = response.headers.get("content-type");
-                if (contentType && contentType.includes("application/json")) {
-                    errorData = await response.json();
-                } else {
-                    errorData = await response.text();
-                }
-                throw new Error(errorData.message || `Failed to fetch registered users: ${response.statusText}`);
-            }
-            const data = await response.json();
-            return data;
+            if (!response.ok) throw new Error('Failed to fetch registered users');
+
+            return await response.json();
         } catch (err) {
             console.error('Error fetching registered users:', err);
             return [];
@@ -111,7 +92,7 @@ const Events = () => {
                 return;
             }
 
-            const response = await fetch('http://localhost:5001/api/projects', { 
+            const response = await fetch(`${API_URL}/api/projects`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -121,22 +102,13 @@ const Events = () => {
             });
 
             if (!response.ok) {
-                let errorData;
-                const contentType = response.headers.get("content-type");
-                if (contentType && contentType.includes("application/json")) {
-                    errorData = await response.json();
-                } else {
-                    errorData = await response.text();
-                }
-                console.error('Error creating entry - Server Response:', errorData);
-                throw new Error(errorData.message || `Failed to create entry: ${response.statusText}`);
+                const errorData = await response.json().catch(() => ({ message: response.statusText }));
+                throw new Error(errorData.message || 'Failed to create entry');
             }
 
-            const createdEntry = await response.json();
-            console.log('Entry created successfully:', createdEntry);
             setShowCreateModal(false);
-            fetchUserEntries(); 
-            alert('Entry created successfully!');
+            fetchUserEntries();
+            // Optional: Success message
         } catch (err) {
             console.error('Error creating entry:', err);
             alert('Error creating entry: ' + err.message);
@@ -157,40 +129,22 @@ const Events = () => {
     }, [user?.id, fetchRegisteredUsers]);
 
     const handleDeleteEntry = useCallback(async (entryId) => {
-        if (!window.confirm("Are you sure you want to delete this event? This action cannot be undone.")) {
-            return;
-        }
+        if (!window.confirm("Are you sure you want to delete this event? This action cannot be undone.")) return;
 
         try {
             const token = getAuthToken();
-            if (!token) {
-                alert("You must be logged in to delete an event.");
-                return;
-            }
+            if (!token) return;
 
-            const response = await fetch(`http://localhost:5001/api/projects/${entryId}`, {
+            const response = await fetch(`${API_URL}/api/projects/${entryId}`, {
                 method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
 
-            if (!response.ok) {
-                let errorData;
-                const contentType = response.headers.get("content-type");
-                if (contentType && contentType.includes("application/json")) {
-                    errorData = await response.json();
-                } else {
-                    errorData = await response.text();
-                }
-                throw new Error(errorData.message || `Failed to delete event: ${response.statusText}`);
-            }
+            if (!response.ok) throw new Error('Failed to delete event');
 
             setShowDetailModal(false);
             setSelectedEntry(null);
-            setRegisteredUsers([]);
             fetchUserEntries();
-            alert('Event deleted successfully!');
         } catch (err) {
             console.error('Error deleting event:', err);
             alert('Error deleting event: ' + err.message);
@@ -201,11 +155,11 @@ const Events = () => {
         try {
             const token = getAuthToken();
             if (!token) {
-                alert("You must be logged in to register for an event.");
+                alert("You must be logged in to register.");
                 return;
             }
 
-            const response = await fetch(`http://localhost:5001/api/projects/${entryId}/register`, {
+            const response = await fetch(`${API_URL}/api/projects/${entryId}/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -214,70 +168,78 @@ const Events = () => {
             });
 
             if (!response.ok) {
-                let errorData;
-                const contentType = response.headers.get("content-type");
-                if (contentType && contentType.includes("application/json")) {
-                    errorData = await response.json();
-                } else {
-                    errorData = await response.text();
-                }
-                throw new Error(errorData.message || `Failed to register for event: ${response.statusText}`);
+                const errorData = await response.json().catch(() => ({ message: response.statusText }));
+                throw new Error(errorData.message || 'Failed to register');
             }
 
-            alert('Successfully registered for the event!');
-            const users = await fetchRegisteredUsers(entryId);
-            setRegisteredUsers(users);
+            alert('Successfully registered!');
+            // Refresh registration list if viewing (though usually user registers as non-host)
         } catch (err) {
-            console.error('Error registering for event:', err);
-            alert('Error registering for event: ' + err.message);
+            console.error('Error registering:', err);
+            alert('Error registering: ' + err.message);
         }
-    }, [fetchRegisteredUsers]);
+    }, []);
 
     const handleViewProfile = useCallback((userIdToView) => {
         navigate(`/profile/${userIdToView}`);
     }, [navigate]);
 
-    // Memoize filtered entries
-    const { events, projects } = useMemo(() => ({
-        events: userEntries.filter(entry => entry.type === 'event'),
-        projects: userEntries.filter(entry => entry.type === 'project')
-    }), [userEntries]);
-
     return (
-        <div className="events-container">
-            <div className="events-header">
-                <h1>Events</h1>
-                {user && (
-                    <button 
-                        onClick={() => setShowCreateModal(true)} 
-                        className="create-button"
-                    >
-                        Create New Event
-                    </button>
+        <div className="min-h-screen pb-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold text-white mb-2">My Events</h1>
+                        <p className="text-text-secondary">Manage and organize your events efficiently.</p>
+                    </div>
+                    {user && (
+                        <button
+                            onClick={() => setShowCreateModal(true)}
+                            className="bg-primary hover:bg-primary-blue-dark text-white px-6 py-3 rounded-full font-bold shadow-lg shadow-primary/25 transition-all transform hover:scale-105 active:scale-95 flex items-center"
+                        >
+                            <FontAwesomeIcon icon={faPlus} className="mr-2" /> Create New Event
+                        </button>
+                    )}
+                </div>
+
+                {/* Content */}
+                {loading ? (
+                    <div className="flex justify-center py-20">
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                    </div>
+                ) : error ? (
+                    <div className="bg-red-500/10 border border-red-500/50 text-red-500 rounded-lg p-6 text-center max-w-xl mx-auto">
+                        <p className="font-bold">{error}</p>
+                    </div>
+                ) : userEntries.length === 0 ? (
+                    <div className="text-center py-20 bg-white/5 rounded-2xl border border-white/5">
+                        <p className="text-text-secondary text-lg mb-4">No events found.</p>
+                        <button
+                            onClick={() => setShowCreateModal(true)}
+                            className="text-primary hover:text-white font-medium transition-colors"
+                        >
+                            Create your first event
+                        </button>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {userEntries.map((entry) => (
+                            <EventCard
+                                key={entry.id}
+                                project={entry}
+                                onClick={() => handleEntryCardClick(entry)}
+                            />
+                        ))}
+                    </div>
                 )}
             </div>
-            {loading ? (
-                <div className="loading">Loading events...</div>
-            ) : error ? (
-                <div className="error">{error}</div>
-            ) : userEntries.length === 0 ? (
-                <div className="no-events">
-                    <p>No events found.</p>
-                </div>
-            ) : (
-                <div className="events-grid">
-                    {userEntries.map((entry) => (
-                        <EventCard
-                            key={entry.id}
-                            project={entry}
-                            onClick={() => handleEntryCardClick(entry)}
-                        />
-                    ))}
-                </div>
-            )}
+
+            {/* Modals */}
             {showDetailModal && selectedEntry && (
                 <EventDetailModal
-                    event={selectedEntry}
+                    show={true}
+                    project={selectedEntry}
                     registeredUsers={registeredUsers}
                     onClose={() => {
                         setShowDetailModal(false);
@@ -286,9 +248,11 @@ const Events = () => {
                     }}
                     onDelete={() => handleDeleteEntry(selectedEntry.id)}
                     onRegister={() => handleRegisterForEntry(selectedEntry.id)}
-                    isCurrentUsersEvent={selectedEntry.user_id === parseInt(user?.id)}
+                    onViewProfile={handleViewProfile}
+                    isHost={selectedEntry.user_id === parseInt(user?.id)}
                 />
             )}
+
             <EventModal
                 show={showCreateModal}
                 onClose={() => setShowCreateModal(false)}
